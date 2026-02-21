@@ -1,0 +1,22 @@
+class CreateSnitchExceptionRecords < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    create_table :snitch_exception_records do |t|
+      t.string :exception_class, null: false
+      t.text :message
+      t.text :backtrace
+      t.string :fingerprint, null: false
+      t.string :request_url
+      t.string :request_method
+      t.text :request_params
+      t.integer :occurrence_count, default: 1
+      t.integer :github_issue_number
+      t.string :github_issue_url
+      t.datetime :first_occurred_at
+      t.datetime :last_occurred_at
+      t.timestamps
+    end
+
+    add_index :snitch_exception_records, :fingerprint, unique: true
+    add_index :snitch_exception_records, :exception_class
+  end
+end
