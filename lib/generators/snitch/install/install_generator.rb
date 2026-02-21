@@ -8,7 +8,7 @@ module Snitch
 
       source_root File.expand_path("templates", __dir__)
 
-      def create_migration
+      def create_migration_file
         migration_template "create_snitch_errors.rb.erb",
           "db/migrate/create_snitch_errors.rb"
       end
