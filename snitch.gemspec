@@ -3,7 +3,7 @@
 require_relative "lib/snitch/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "snitch"
+  spec.name = "snitch-rails"
   spec.version = Snitch::VERSION
   spec.authors = ["RiseKit"]
   spec.summary = "Automatic GitHub issue creation for unhandled Rails exceptions."
