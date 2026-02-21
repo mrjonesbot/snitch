@@ -7,7 +7,7 @@ Snitch automatically catches unhandled exceptions in your Rails application, per
 Add Snitch to your Gemfile:
 
 ```ruby
-gem "snitch-rails"
+gem "snitch-rails", require: "snitch"
 ```
 
 Run bundle install:
