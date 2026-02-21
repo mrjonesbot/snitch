@@ -5,7 +5,7 @@ require "active_job"
 require "action_dispatch"
 require "webmock/rspec"
 require "snitch"
-require "snitch/models/exception_record"
+require "snitch/models/event"
 require "snitch/jobs/report_exception_job"
 
 # Set up in-memory SQLite database
@@ -15,7 +15,7 @@ ActiveRecord::Base.establish_connection(
 )
 
 ActiveRecord::Schema.define do
-  create_table :snitch_exception_records, force: true do |t|
+  create_table :snitch_errors, force: true do |t|
     t.string :exception_class, null: false
     t.text :message
     t.text :backtrace
@@ -31,8 +31,8 @@ ActiveRecord::Schema.define do
     t.timestamps
   end
 
-  add_index :snitch_exception_records, :fingerprint, unique: true
-  add_index :snitch_exception_records, :exception_class
+  add_index :snitch_errors, :fingerprint, unique: true
+  add_index :snitch_errors, :exception_class
 end
 
 # Configure ActiveJob for testing
@@ -53,7 +53,7 @@ RSpec.configure do |config|
   end
 
   config.after(:each) do
-    Snitch::ExceptionRecord.delete_all
+    Snitch::Event.delete_all
   end
 
   config.order = :random

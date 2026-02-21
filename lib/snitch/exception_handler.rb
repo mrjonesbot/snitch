@@ -39,7 +39,7 @@ module Snitch
       end
 
       def find_or_create_record(exception, fingerprint, request_data)
-        existing = ExceptionRecord.find_by(fingerprint: fingerprint)
+        existing = Event.find_by(fingerprint: fingerprint)
 
         if existing
           existing.update!(
@@ -50,7 +50,7 @@ module Snitch
           )
           existing
         else
-          ExceptionRecord.create!(
+          Event.create!(
             exception_class: exception.class.name,
             message: exception.message,
             backtrace: exception.backtrace,

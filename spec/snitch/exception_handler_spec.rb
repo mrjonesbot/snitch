@@ -17,12 +17,12 @@ RSpec.describe Snitch::ExceptionHandler do
     context "when enabled" do
       it "creates a new ExceptionRecord" do
         expect { described_class.handle(exception) }
-          .to change(Snitch::ExceptionRecord, :count).by(1)
+          .to change(Snitch::Event, :count).by(1)
       end
 
       it "returns the created record" do
         record = described_class.handle(exception)
-        expect(record).to be_a(Snitch::ExceptionRecord)
+        expect(record).to be_a(Snitch::Event)
         expect(record.exception_class).to eq("RuntimeError")
         expect(record.message).to eq("test error")
         expect(record.occurrence_count).to eq(1)
@@ -55,7 +55,7 @@ RSpec.describe Snitch::ExceptionHandler do
 
       it "does not create a record" do
         expect { described_class.handle(exception) }
-          .not_to change(Snitch::ExceptionRecord, :count)
+          .not_to change(Snitch::Event, :count)
       end
 
       it "returns nil" do
@@ -67,19 +67,19 @@ RSpec.describe Snitch::ExceptionHandler do
       it "ignores exceptions matching string class names" do
         Snitch.configuration.ignored_exceptions = ["RuntimeError"]
         expect { described_class.handle(exception) }
-          .not_to change(Snitch::ExceptionRecord, :count)
+          .not_to change(Snitch::Event, :count)
       end
 
       it "ignores exceptions matching class constants" do
         Snitch.configuration.ignored_exceptions = [RuntimeError]
         expect { described_class.handle(exception) }
-          .not_to change(Snitch::ExceptionRecord, :count)
+          .not_to change(Snitch::Event, :count)
       end
 
       it "does not ignore non-matching exceptions" do
         Snitch.configuration.ignored_exceptions = [ArgumentError]
         expect { described_class.handle(exception) }
-          .to change(Snitch::ExceptionRecord, :count).by(1)
+          .to change(Snitch::Event, :count).by(1)
       end
     end
 
@@ -95,7 +95,7 @@ RSpec.describe Snitch::ExceptionHandler do
       it "does not create a second record for same fingerprint" do
         described_class.handle(exception)
         expect { described_class.handle(exception) }
-          .not_to change(Snitch::ExceptionRecord, :count)
+          .not_to change(Snitch::Event, :count)
       end
 
       it "updates last_occurred_at on subsequent occurrences" do
@@ -119,7 +119,7 @@ RSpec.describe Snitch::ExceptionHandler do
 
         described_class.handle(new_ex)
 
-        record = Snitch::ExceptionRecord.last
+        record = Snitch::Event.last
         expect(record.message).to eq("updated message")
       end
 
@@ -129,7 +129,7 @@ RSpec.describe Snitch::ExceptionHandler do
 
         described_class.handle(exception)
         expect { described_class.handle(ex2) }
-          .to change(Snitch::ExceptionRecord, :count).by(1)
+          .to change(Snitch::Event, :count).by(1)
       end
     end
 
@@ -140,7 +140,7 @@ RSpec.describe Snitch::ExceptionHandler do
 
       it "still creates the record" do
         expect { described_class.handle(exception) }
-          .to change(Snitch::ExceptionRecord, :count).by(1)
+          .to change(Snitch::Event, :count).by(1)
       end
 
       it "does not raise" do

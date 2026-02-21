@@ -6,8 +6,8 @@ module Snitch
 
     retry_on StandardError, wait: :polynomially_longer, attempts: 3
 
-    def perform(exception_record_id)
-      record = ExceptionRecord.find_by(id: exception_record_id)
+    def perform(event_id)
+      record = Event.find_by(id: event_id)
       return unless record
 
       client = GitHubClient.new

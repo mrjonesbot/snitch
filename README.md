@@ -63,7 +63,7 @@ export SNITCH_GITHUB_TOKEN=ghp_your_token_here
 
 1. Rack middleware catches any unhandled exception (and re-raises it so normal error handling still applies)
 2. The exception is fingerprinted using a SHA256 hash of the exception class and the first application backtrace line
-3. A `snitch_exception_records` row is created (or updated if the same fingerprint already exists, incrementing the occurrence count)
+3. A `snitch_errors` record is created (or updated if the same fingerprint already exists, incrementing the occurrence count)
 4. An ActiveJob is enqueued to create a GitHub issue (or comment on the existing one for duplicate exceptions)
 5. The GitHub issue includes the full backtrace, request context, and an @mention for investigation
 

@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Snitch::GitHubClient do
   let(:client) { described_class.new }
   let(:record) do
-    Snitch::ExceptionRecord.create!(
+    Snitch::Event.create!(
       exception_class: "RuntimeError",
       message: "something broke",
       backtrace: ["/app/models/user.rb:10:in `save!'"],

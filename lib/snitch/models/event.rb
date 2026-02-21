@@ -1,6 +1,6 @@
 module Snitch
-  class ExceptionRecord < ActiveRecord::Base
-    self.table_name = "snitch_exception_records"
+  class Event < ActiveRecord::Base
+    self.table_name = "snitch_errors"
 
     serialize :backtrace, coder: JSON
     serialize :request_params, coder: JSON

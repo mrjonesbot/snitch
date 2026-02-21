@@ -9,9 +9,9 @@ module Snitch
       @repo = Snitch.configuration.github_repo
     end
 
-    def create_issue(exception_record)
-      title = build_title(exception_record)
-      body = build_issue_body(exception_record)
+    def create_issue(event)
+      title = build_title(event)
+      body = build_issue_body(event)
 
       issue = @client.create_issue(@repo, title, body, labels: ["snitch", "bug"])
 
@@ -21,9 +21,9 @@ module Snitch
       }
     end
 
-    def comment_on_issue(exception_record)
-      body = build_comment_body(exception_record)
-      @client.add_comment(@repo, exception_record.github_issue_number, body)
+    def comment_on_issue(event)
+      body = build_comment_body(event)
+      @client.add_comment(@repo, event.github_issue_number, body)
     end
 
     private
