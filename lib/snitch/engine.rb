@@ -3,7 +3,7 @@ module Snitch
     isolate_namespace Snitch
 
     initializer "snitch.middleware" do |app|
-      app.middleware.insert_before 0, Snitch::Middleware
+      app.middleware.insert_after ActionDispatch::DebugExceptions, Snitch::Middleware
     end
   end
 end
