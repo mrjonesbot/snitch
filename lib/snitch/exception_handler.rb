@@ -16,10 +16,13 @@ module Snitch
       private
 
       def ignored?(exception)
-        Snitch.configuration.ignored_exceptions.any? do |ignored|
+        config_ignored = Snitch.configuration.ignored_exceptions.any? do |ignored|
           ignored_class = ignored.is_a?(String) ? ignored.safe_constantize : ignored
           ignored_class && exception.is_a?(ignored_class)
         end
+        return true if config_ignored
+
+        Snitch::Event.ignored.where(exception_class: exception.class.name).exists?
       end
 
       def extract_request_data(env)

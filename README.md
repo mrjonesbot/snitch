@@ -4,6 +4,15 @@ Snitch catches unhandled exceptions in your Rails application, persists them to 
 
 ![Example GitHub issue created by Snitch](example.png)
 
+## Features
+
+- Automatic exception capture via Rack middleware
+- Fingerprinting and deduplication (increments occurrence count for repeat exceptions)
+- GitHub issue creation with full backtrace, request context, and @mentions
+- **Dashboard** at `/snitches` with tabbed views: Open, Closed, and Ignored
+- Ignore exceptions via config or directly from the dashboard
+- Manual exception reporting for rescued exceptions
+
 ## Installation
 
 Add Snitch to your Gemfile:
@@ -18,16 +27,32 @@ Run bundle install:
 bundle install
 ```
 
-Run the install generator to create the migration and initializer:
+Run the install generator:
 
 ```bash
 rails generate snitch:install
+rails db:migrate
 ```
 
-Run the migration:
+The installer mounts the dashboard to `config/routes.rb`:
+
+```ruby
+mount Snitch::Engine, at: "/snitches"
+```
+
+### Upgrading from a previous version
+
+If you're upgrading from a version prior to 0.3.0, run the update generator to add the `status` column to the `snitch_errors` table:
 
 ```bash
+rails generate snitch:update
 rails db:migrate
+```
+
+Then mount the engine in your `config/routes.rb`:
+
+```ruby
+mount Snitch::Engine, at: "/snitches"
 ```
 
 ## Configuration
@@ -55,7 +80,32 @@ end
 
 ### GitHub Token
 
-Create a [personal access token](https://github.com/settings/tokens) with the `repo` scope and set it as an environment variable:
+Create a [personal access token](https://github.com/settings/tokens) with the `repo` scope and set it as an environment variable.
+
+## Dashboard
+
+Visit `/snitches` in your browser to view the Snitch dashboard.
+
+![Snitch Dashboard](dashboard.png)
+
+The dashboard provides three tabs:
+
+- **Open** — Exceptions that need attention. Shows the most recently occurred first.
+- **Closed** — Exceptions that have been resolved. You can reopen them if they recur.
+- **Ignored** — Exceptions you've chosen to suppress. Ignored exceptions will not create new GitHub issues even if they occur again.
+
+From the dashboard you can change the status of any exception:
+- Open exceptions can be **closed** or **ignored**
+- Closed or ignored exceptions can be **reopened**
+
+### Ignoring Exceptions
+
+There are two ways to ignore exceptions, and Snitch honors both:
+
+1. **Via the initializer** — Add exception classes to `config.ignored_exceptions`. These are filtered at the middleware level and never captured or persisted.
+2. **Via the dashboard** — Mark individual exceptions as "Ignored" from the Open tab. Future occurrences of that exception class will be silently skipped — no new records, no GitHub issues.
+
+Both sources are checked every time an exception is caught. If an exception class appears in either the initializer config or has a record with status "ignored" in the database, it will be ignored.
 
 ## Manual Reporting
 
@@ -84,9 +134,9 @@ The same fingerprinting and deduplication rules apply. If the same exception is 
 
 ## Roadmap
 
-- [ ] multi-db support
-- [ ] simple dashboard to view captured exceptions (linked to gh issue)
-- [ ] webhook to resolve snitch record, when issues resolve
+- [x] Dashboard to view and manage captured exceptions
+- [ ] Multi-db support
+- [ ] Webhook to resolve snitch records when GitHub issues close
 
 ## Requirements
 
