@@ -1,6 +1,8 @@
 # Snitch
 
-Snitch automatically catches unhandled exceptions in your Rails application, persists them to the database, and reports them as GitHub issues that @mention Claude for automated investigation.
+Snitch catches unhandled exceptions in your Rails application, persists them to the database, and reports them as GitHub issues that @mention Claude for automated investigation.
+
+![Example GitHub issue created by Snitch](example.png)
 
 ## Installation
 
@@ -55,9 +57,22 @@ end
 
 Create a [personal access token](https://github.com/settings/tokens) with the `repo` scope and set it as an environment variable:
 
-```bash
-export SNITCH_GITHUB_TOKEN=ghp_your_token_here
+## Manual Reporting
+
+Snitch automatically catches unhandled exceptions via middleware, but you can also report exceptions you rescue yourself:
+
+```ruby
+begin
+  SomeExternalService.call(params)
+rescue ExternalService::Timeout => e
+  Snitch::ExceptionHandler.handle(e)
+  # continue with your fallback logic
+end
 ```
+
+This is useful for exceptions you want to recover from gracefully but still want visibility into — failed API calls, flaky third-party services, background job retries, etc.
+
+The same fingerprinting and deduplication rules apply. If the same exception is reported multiple times, Snitch will increment the occurrence count and comment on the existing GitHub issue rather than creating a new one.
 
 ## How It Works
 
@@ -66,6 +81,12 @@ export SNITCH_GITHUB_TOKEN=ghp_your_token_here
 3. A `snitch_errors` record is created (or updated if the same fingerprint already exists, incrementing the occurrence count)
 4. An ActiveJob is enqueued to create a GitHub issue (or comment on the existing one for duplicate exceptions)
 5. The GitHub issue includes the full backtrace, request context, and an @mention for investigation
+
+## Roadmap
+
+- [ ] multi-db support
+- [ ] simple dashboard to view captured exceptions (linked to gh issue)
+- [ ] webhook to resolve snitch record, when issues resolve
 
 ## Requirements
 
