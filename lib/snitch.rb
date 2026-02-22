@@ -6,6 +6,7 @@ require "snitch/fingerprint"
 require "snitch/middleware"
 require "snitch/exception_handler"
 require "snitch/github_client"
+require "snitch/models/event" if defined?(ActiveRecord)
 require "snitch/jobs/report_exception_job" if defined?(ActiveJob)
 require "snitch/engine" if defined?(Rails)
 
