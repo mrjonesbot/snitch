@@ -1,0 +1,6 @@
+class AddStatusToSnitchErrors < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    add_column :snitch_errors, :status, :string, default: "open", null: false
+    add_index :snitch_errors, :status
+  end
+end

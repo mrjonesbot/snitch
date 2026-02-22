@@ -26,6 +26,7 @@ ActiveRecord::Schema.define do
     t.integer :occurrence_count, default: 1
     t.integer :github_issue_number
     t.string :github_issue_url
+    t.string :status, default: "open", null: false
     t.datetime :first_occurred_at
     t.datetime :last_occurred_at
     t.timestamps
@@ -33,6 +34,7 @@ ActiveRecord::Schema.define do
 
   add_index :snitch_errors, :fingerprint, unique: true
   add_index :snitch_errors, :exception_class
+  add_index :snitch_errors, :status
 end
 
 # Configure ActiveJob for testing

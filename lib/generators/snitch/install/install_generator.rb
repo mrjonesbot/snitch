@@ -33,6 +33,10 @@ module Snitch
       def create_initializer
         template "snitch.rb", "config/initializers/snitch.rb"
       end
+
+      def add_route
+        route 'mount Snitch::Engine, at: "/snitches"'
+      end
     end
   end
 end

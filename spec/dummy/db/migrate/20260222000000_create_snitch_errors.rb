@@ -1,4 +1,4 @@
-class CreateSnitchErrors < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+class CreateSnitchErrors < ActiveRecord::Migration[7.0]
   def change
     create_table :snitch_errors do |t|
       t.string :exception_class, null: false
