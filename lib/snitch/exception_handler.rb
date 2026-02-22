@@ -71,7 +71,7 @@ module Snitch
       def enqueue_report(record)
         ReportExceptionJob.perform_later(record.id)
       rescue => e
-        Rails.logger.error("[Snitch] Failed to enqueue report job: #{e.message}") if defined?(Rails)
+        Rails.logger.error("[Snitch] Failed to enqueue report job: #{e.message}") if defined?(Rails) && Rails.respond_to?(:logger) && Rails.logger
       end
     end
   end

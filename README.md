@@ -12,6 +12,8 @@ Snitch catches unhandled exceptions in your Rails application, persists them to 
 - **Dashboard** at `/snitches` with tabbed views: Open, Closed, and Ignored
 - Ignore exceptions via config or directly from the dashboard
 - Manual exception reporting for rescued exceptions
+- GitHub webhook to auto-close events when issues are closed
+- Auto-reopens events (and their GitHub issues) when a closed exception recurs
 
 ## Installation
 
@@ -174,8 +176,8 @@ Once configured, closing a GitHub issue will automatically close the correspondi
 ## Roadmap
 
 - [x] Dashboard to view and manage captured exceptions
-- [ ] Multi-db support
 - [x] Webhook to resolve snitch records when GitHub issues close
+- [ ] Multi-db support
 
 ## Requirements
 

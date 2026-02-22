@@ -10,7 +10,7 @@ module Snitch
       begin
         ExceptionHandler.handle(e, env)
       rescue => handler_error
-        Rails.logger.error("[Snitch] Handler error: #{handler_error.message}") if defined?(Rails)
+        Rails.logger.error("[Snitch] Handler error: #{handler_error.message}") if defined?(Rails) && Rails.respond_to?(:logger) && Rails.logger
       end
       raise e
     end
