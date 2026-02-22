@@ -123,6 +123,37 @@ RSpec.describe Snitch::ExceptionHandler do
         expect(record.message).to eq("updated message")
       end
 
+      it "reopens a closed event when it recurs" do
+        record = described_class.handle(exception)
+        record.update!(status: "closed")
+
+        described_class.handle(exception)
+        record.reload
+
+        expect(record.status).to eq("open")
+        expect(record.occurrence_count).to eq(2)
+      end
+
+      it "does not change status of an already open event" do
+        record = described_class.handle(exception)
+        expect(record.status).to eq("open")
+
+        described_class.handle(exception)
+        record.reload
+
+        expect(record.status).to eq("open")
+      end
+
+      it "does not reopen an ignored event" do
+        record = described_class.handle(exception)
+        record.update!(status: "ignored")
+
+        described_class.handle(exception)
+        record.reload
+
+        expect(record.status).to eq("ignored")
+      end
+
       it "creates separate records for different fingerprints" do
         ex2 = ArgumentError.new("different")
         ex2.set_backtrace(["/app/controllers/foo.rb:5:in `index'"])

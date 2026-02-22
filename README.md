@@ -75,6 +75,9 @@ Snitch.configure do |config|
 
   # Exceptions to ignore (default: ActiveRecord::RecordNotFound, ActionController::RoutingError)
   config.ignored_exceptions += [YourCustomError]
+
+  # GitHub webhook secret for auto-closing events when issues are closed (optional)
+  config.github_webhook_secret = ENV["SNITCH_GITHUB_WEBHOOK_SECRET"]
 end
 ```
 
@@ -124,6 +127,42 @@ This is useful for exceptions you want to recover from gracefully but still want
 
 The same fingerprinting and deduplication rules apply. If the same exception is reported multiple times, Snitch will increment the occurrence count and comment on the existing GitHub issue rather than creating a new one.
 
+## GitHub Webhook (Auto-Close)
+
+When a developer fixes a bug and closes the GitHub issue, Snitch can automatically close the matching event record in your database — no manual dashboard cleanup required.
+
+### Setup
+
+1. Generate a webhook secret:
+
+```bash
+ruby -rsecurerandom -e "puts SecureRandom.hex(32)"
+```
+
+2. Add the secret to your environment and Snitch config:
+
+```bash
+export SNITCH_GITHUB_WEBHOOK_SECRET="your-generated-secret"
+```
+
+```ruby
+# config/initializers/snitch.rb
+config.github_webhook_secret = ENV["SNITCH_GITHUB_WEBHOOK_SECRET"]
+```
+
+3. Add the same secret to your GitHub repository. Go to **Settings > Webhooks > Add webhook** and configure:
+
+| Field          | Value                                          |
+|----------------|------------------------------------------------|
+| Payload URL    | `https://yourapp.com/snitches/webhooks/github` |
+| Content type   | `application/json`                             |
+| Secret         | The secret you generated in step 1             |
+| Events         | Select **Issues** only                         |
+
+The secret must match on both sides — your app uses it to verify that incoming webhooks are genuinely from GitHub.
+
+Once configured, closing a GitHub issue will automatically close the corresponding Snitch event.
+
 ## How It Works
 
 1. Rack middleware catches any unhandled exception (and re-raises it so normal error handling still applies)
@@ -136,7 +175,7 @@ The same fingerprinting and deduplication rules apply. If the same exception is 
 
 - [x] Dashboard to view and manage captured exceptions
 - [ ] Multi-db support
-- [ ] Webhook to resolve snitch records when GitHub issues close
+- [x] Webhook to resolve snitch records when GitHub issues close
 
 ## Requirements
 

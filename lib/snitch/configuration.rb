@@ -2,11 +2,12 @@
 
 module Snitch
   class Configuration
-    attr_accessor :github_token, :github_repo, :mention, :enabled, :ignored_exceptions
+    attr_accessor :github_token, :github_repo, :github_webhook_secret, :mention, :enabled, :ignored_exceptions
 
     def initialize
       @github_token = nil
       @github_repo = nil
+      @github_webhook_secret = nil
       @mention = "@claude"
       @enabled = true
       @ignored_exceptions = [

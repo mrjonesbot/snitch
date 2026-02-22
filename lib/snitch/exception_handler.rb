@@ -45,12 +45,14 @@ module Snitch
         existing = Event.find_by(fingerprint: fingerprint)
 
         if existing
-          existing.update!(
+          attrs = {
             occurrence_count: existing.occurrence_count + 1,
             last_occurred_at: Time.current,
             message: exception.message,
             backtrace: exception.backtrace
-          )
+          }
+          attrs[:status] = "open" if existing.status == "closed"
+          existing.update!(**attrs)
           existing
         else
           Event.create!(

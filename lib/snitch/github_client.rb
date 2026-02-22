@@ -24,6 +24,11 @@ module Snitch
     def comment_on_issue(event)
       body = build_comment_body(event)
       @client.add_comment(@repo, event.github_issue_number, body)
+      reopen_issue(event) if event.status == "open"
+    end
+
+    def reopen_issue(event)
+      @client.update_issue(@repo, event.github_issue_number, state: "open")
     end
 
     private

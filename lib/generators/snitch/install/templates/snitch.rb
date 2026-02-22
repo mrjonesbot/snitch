@@ -13,4 +13,7 @@ Snitch.configure do |config|
 
   # Exceptions to ignore (default: RecordNotFound, RoutingError)
   # config.ignored_exceptions += [CustomError]
+
+  # GitHub webhook secret for auto-closing events when issues are closed
+  # config.github_webhook_secret = ENV["SNITCH_GITHUB_WEBHOOK_SECRET"]
 end

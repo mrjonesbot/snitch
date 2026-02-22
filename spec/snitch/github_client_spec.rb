@@ -134,6 +134,12 @@ RSpec.describe Snitch::GitHubClient do
           headers: { "Content-Type" => "application/json" },
           body: { id: 1 }.to_json
         )
+      stub_request(:patch, "https://api.github.com/repos/owner/repo/issues/42")
+        .to_return(
+          status: 200,
+          headers: { "Content-Type" => "application/json" },
+          body: { number: 42, state: "open" }.to_json
+        )
     end
 
     it "posts a comment on the existing issue" do
@@ -159,6 +165,42 @@ RSpec.describe Snitch::GitHubClient do
 
       client.comment_on_issue(record_with_issue)
       expect(stub).to have_been_requested
+    end
+
+    it "reopens the GitHub issue when the event was reopened" do
+      record_with_issue.update!(status: "open")
+
+      stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
+        .to_return(
+          status: 201,
+          headers: { "Content-Type" => "application/json" },
+          body: { id: 1 }.to_json
+        )
+      reopen_stub = stub_request(:patch, "https://api.github.com/repos/owner/repo/issues/42")
+        .with(body: hash_including("state" => "open"))
+        .to_return(
+          status: 200,
+          headers: { "Content-Type" => "application/json" },
+          body: { number: 42, state: "open" }.to_json
+        )
+
+      client.comment_on_issue(record_with_issue)
+      expect(reopen_stub).to have_been_requested
+    end
+
+    it "does not reopen the GitHub issue when the event is not open" do
+      record_with_issue.update!(status: "closed")
+
+      stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
+        .to_return(
+          status: 201,
+          headers: { "Content-Type" => "application/json" },
+          body: { id: 1 }.to_json
+        )
+
+      client.comment_on_issue(record_with_issue)
+
+      expect(WebMock).not_to have_requested(:patch, "https://api.github.com/repos/owner/repo/issues/42")
     end
 
     it "includes mention in the comment" do
