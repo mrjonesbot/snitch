@@ -57,7 +57,7 @@ module Snitch
         - **Params:** `#{record.request_params}`
 
         ---
-        #{mention} Please investigate this exception. Analyze the backtrace, identify the root cause, and suggest a fix.
+        #{mention} Please investigate this exception. Analyze the backtrace, identify the root cause, fix the issue, and open a pull request with your changes.
       MARKDOWN
     end
 
@@ -73,7 +73,7 @@ module Snitch
         - **Params:** `#{record.request_params}`
 
         ---
-        #{mention} This exception has occurred again. Please review if the previous analysis still applies.
+        #{mention} This exception has occurred again. Please review if the previous analysis still applies, fix the issue, and open a pull request with your changes.
       MARKDOWN
     end
 
