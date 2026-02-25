@@ -10,16 +10,18 @@ module Snitch
       record = Event.find_by(id: event_id)
       return unless record
 
-      client = GitHubClient.new
+      record.with_lock do
+        client = GitHubClient.new
 
-      if record.github_issue_number.present?
-        client.comment_on_issue(record)
-      else
-        result = client.create_issue(record)
-        record.update!(
-          github_issue_number: result[:number],
-          github_issue_url: result[:url]
-        )
+        if record.github_issue_number.present?
+          client.comment_on_issue(record)
+        else
+          result = client.create_issue(record)
+          record.update!(
+            github_issue_number: result[:number],
+            github_issue_url: result[:url]
+          )
+        end
       end
     end
   end
