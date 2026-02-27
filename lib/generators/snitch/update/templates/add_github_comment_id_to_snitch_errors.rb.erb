@@ -1,0 +1,5 @@
+class AddGithubCommentIdToSnitchErrors < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    add_column :snitch_errors, :github_comment_id, :integer
+  end
+end

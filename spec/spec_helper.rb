@@ -26,6 +26,7 @@ ActiveRecord::Schema.define do
     t.integer :occurrence_count, default: 1
     t.integer :github_issue_number
     t.string :github_issue_url
+    t.integer :github_comment_id
     t.string :status, default: "open", null: false
     t.datetime :first_occurred_at
     t.datetime :last_occurred_at

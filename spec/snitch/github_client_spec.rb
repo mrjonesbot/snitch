@@ -128,12 +128,6 @@ RSpec.describe Snitch::GitHubClient do
     end
 
     before do
-      stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
-        .to_return(
-          status: 201,
-          headers: { "Content-Type" => "application/json" },
-          body: { id: 1 }.to_json
-        )
       stub_request(:patch, "https://api.github.com/repos/owner/repo/issues/42")
         .to_return(
           status: 200,
@@ -142,16 +136,57 @@ RSpec.describe Snitch::GitHubClient do
         )
     end
 
-    it "posts a comment on the existing issue" do
-      stub = stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
-        .to_return(
-          status: 201,
-          headers: { "Content-Type" => "application/json" },
-          body: { id: 1 }.to_json
-        )
+    context "when no comment exists yet" do
+      before do
+        stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
+          .to_return(
+            status: 201,
+            headers: { "Content-Type" => "application/json" },
+            body: { id: 100 }.to_json
+          )
+      end
 
-      client.comment_on_issue(record_with_issue)
-      expect(stub).to have_been_requested
+      it "creates a new comment" do
+        stub = stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
+          .to_return(
+            status: 201,
+            headers: { "Content-Type" => "application/json" },
+            body: { id: 100 }.to_json
+          )
+
+        client.comment_on_issue(record_with_issue)
+        expect(stub).to have_been_requested
+      end
+
+      it "saves the comment ID on the event" do
+        client.comment_on_issue(record_with_issue)
+        expect(record_with_issue.reload.github_comment_id).to eq(100)
+      end
+    end
+
+    context "when a comment already exists" do
+      before do
+        record_with_issue.update!(github_comment_id: 100)
+        stub_request(:patch, "https://api.github.com/repos/owner/repo/issues/comments/100")
+          .to_return(
+            status: 200,
+            headers: { "Content-Type" => "application/json" },
+            body: { id: 100 }.to_json
+          )
+      end
+
+      it "updates the existing comment instead of creating a new one" do
+        update_stub = stub_request(:patch, "https://api.github.com/repos/owner/repo/issues/comments/100")
+          .to_return(
+            status: 200,
+            headers: { "Content-Type" => "application/json" },
+            body: { id: 100 }.to_json
+          )
+
+        client.comment_on_issue(record_with_issue)
+        expect(update_stub).to have_been_requested
+        expect(WebMock).not_to have_requested(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
+      end
     end
 
     it "includes occurrence count in the comment" do
@@ -160,7 +195,20 @@ RSpec.describe Snitch::GitHubClient do
         .to_return(
           status: 201,
           headers: { "Content-Type" => "application/json" },
-          body: { id: 1 }.to_json
+          body: { id: 100 }.to_json
+        )
+
+      client.comment_on_issue(record_with_issue)
+      expect(stub).to have_been_requested
+    end
+
+    it "does not include a mention in the comment" do
+      stub = stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
+        .with { |req| !req.body.include?("@claude") }
+        .to_return(
+          status: 201,
+          headers: { "Content-Type" => "application/json" },
+          body: { id: 100 }.to_json
         )
 
       client.comment_on_issue(record_with_issue)
@@ -174,7 +222,7 @@ RSpec.describe Snitch::GitHubClient do
         .to_return(
           status: 201,
           headers: { "Content-Type" => "application/json" },
-          body: { id: 1 }.to_json
+          body: { id: 100 }.to_json
         )
       reopen_stub = stub_request(:patch, "https://api.github.com/repos/owner/repo/issues/42")
         .with(body: hash_including("state" => "open"))
@@ -195,25 +243,13 @@ RSpec.describe Snitch::GitHubClient do
         .to_return(
           status: 201,
           headers: { "Content-Type" => "application/json" },
-          body: { id: 1 }.to_json
+          body: { id: 100 }.to_json
         )
 
       client.comment_on_issue(record_with_issue)
 
       expect(WebMock).not_to have_requested(:patch, "https://api.github.com/repos/owner/repo/issues/42")
-    end
-
-    it "includes mention in the comment" do
-      stub = stub_request(:post, "https://api.github.com/repos/owner/repo/issues/42/comments")
-        .with(body: hash_including("body" => a_string_matching(/@claude/)))
-        .to_return(
-          status: 201,
-          headers: { "Content-Type" => "application/json" },
-          body: { id: 1 }.to_json
-        )
-
-      client.comment_on_issue(record_with_issue)
-      expect(stub).to have_been_requested
+        .with(body: hash_including("state" => "open"))
     end
   end
 end

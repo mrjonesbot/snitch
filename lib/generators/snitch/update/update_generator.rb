@@ -9,8 +9,8 @@ module Snitch
       source_root File.expand_path("templates", __dir__)
 
       def create_migration_file
-        migration_template "add_status_to_snitch_errors.rb.erb",
-          "db/migrate/add_status_to_snitch_errors.rb"
+        migration_template "add_github_comment_id_to_snitch_errors.rb.erb",
+          "db/migrate/add_github_comment_id_to_snitch_errors.rb"
       end
     end
   end

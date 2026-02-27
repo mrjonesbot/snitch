@@ -23,7 +23,14 @@ module Snitch
 
     def comment_on_issue(event)
       body = build_comment_body(event)
-      @client.add_comment(@repo, event.github_issue_number, body)
+
+      if event.github_comment_id.present?
+        @client.update_comment(@repo, event.github_comment_id, body)
+      else
+        comment = @client.add_comment(@repo, event.github_issue_number, body)
+        event.update!(github_comment_id: comment.id)
+      end
+
       reopen_issue(event) if event.status == "open"
     end
 
@@ -62,18 +69,8 @@ module Snitch
     end
 
     def build_comment_body(record)
-      mention = Snitch.configuration.mention
       <<~MARKDOWN
-        ## New Occurrence
-        **Total occurrences:** #{record.occurrence_count}
-        **Latest occurrence:** #{record.last_occurred_at&.utc}
-
-        ## Latest Request Context
-        - **URL:** #{record.request_method} #{record.request_url}
-        - **Params:** `#{record.request_params}`
-
-        ---
-        #{mention} This exception has occurred again. Please review if the previous analysis still applies, fix the issue, and open a pull request with your changes.
+        **Occurrences:** #{record.occurrence_count} | **Latest:** #{record.last_occurred_at&.utc}
       MARKDOWN
     end
 
